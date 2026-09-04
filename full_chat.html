@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages Inbox - AuraMarket</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <!-- Styling -->
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+    
+    <!-- Chart.js (used in Analytics) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+</head>
+<body>
+    <!-- Toast notifications -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <header class="glass-nav">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <i data-feather="zap"></i> AuraMarket
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/dashboard" class="nav-link" title="Sellers Analytics & Moderation">Dashboard</a>
+                
+                
+                    <a href="/my_listings" class="nav-link">My Listings</a>
+                    <a href="/wishlist" class="nav-link"><i data-feather="heart" style="width:18px; height:18px; vertical-align:middle;"></i> Wishlist</a>
+                    <a href="/chat" class="nav-link" title="Inbox Messages">
+                        <i data-feather="mail" style="width:18px; height:18px; vertical-align:middle;"></i> Chat
+                    </a>
+                    <span style="font-size:14px; font-weight:600; color:var(--accent-color);">
+                        👤 None
+                    </span>
+                    <a href="/auth/logout" class="nav-link" style="color:var(--danger);">Logout</a>
+                    <a href="/product/add" class="btn btn-primary">
+                        <i data-feather="plus"></i> Sell
+                    </a>
+                
+
+                <button class="theme-toggle" title="Toggle theme">
+                    <i data-feather="moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 30px;">
+        
+<div class="chat-layout">
+    <!-- Left Panel: Conversations List -->
+    <div class="chat-inbox">
+        <div class="inbox-header">
+            <h2 style="font-size:18px;">Conversations</h2>
+        </div>
+        <div class="chat-list">
+            
+                
+                    <a href="/chat/23" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Apple MacBook Pro M3
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/22" class="chat-item active">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Apple MacBook Pro M3
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/16" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Cricket Bat (English Willow)
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/15" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: iPhone 14 Pro Max 256GB - Perfect Condition
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/14" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                S
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    SarahDeals
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Vintage Car
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/13" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                A
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    AliceBuyer
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: 2BHK Apartment
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/6" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Vintage Denim Jacket
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/5" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                A
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    AliceBuyer
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Nike Air Jordan 1 Retro High
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/4" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                S
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    SarahDeals
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Smart Home Hub
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/3" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                J
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    JohnSeller
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Professional Mountain Trail Bike 29er
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/2" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                A
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    AliceBuyer
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Bluetooth Speaker
+                            </div>
+                        </div>
+                    </a>
+                
+                    <a href="/chat/1" class="chat-item ">
+                        <div class="chat-avatar">
+                            
+                                S
+                            
+                        </div>
+                        <div class="chat-item-info">
+                            <div class="chat-item-name">
+                                
+                                    SarahDeals
+                                
+                            </div>
+                            <div class="chat-item-preview">
+                                Re: Wooden Dining Table Set
+                            </div>
+                        </div>
+                    </a>
+                
+            
+        </div>
+    </div>
+
+    <!-- Right Panel: Message Window -->
+    <div class="chat-window">
+        
+            <div class="chat-header">
+                <div>
+                    <h3 style="font-size:16px;">
+                        
+                            JohnSeller
+                        
+                    </h3>
+                    <span style="font-size:12px; color:var(--text-secondary);">Listing: <a href="/product/11" style="color:var(--accent-color); font-weight:600; text-decoration:none;">Apple MacBook Pro M3</a></span>
+                </div>
+                <div>
+                    <span style="font-size:13px; font-weight:700; color:var(--success);"><i data-feather="shield" style="width:14px; height:14px; vertical-align:middle;"></i> Escrow Chat Protect</span>
+                </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="chat-messages" id="messages-container">
+                
+                    <div style="flex-grow:1; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); font-size:14px;">
+                        Say hello to initiate negotiation! Keep communication inside AuraMarket.
+                    </div>
+                
+            </div>
+
+            <!-- Message Send Input -->
+            <form action="/chat/22/send" method="POST" class="chat-input-area" id="chat-form">
+                <input type="text" name="message_text" id="message-input" class="chat-input" placeholder="Type a message..." required autocomplete="off">
+                <button type="submit" class="btn btn-primary" style="border-radius:20px; padding:10px 20px;">
+                    <i data-feather="send"></i>
+                </button>
+            </form>
+        
+    </div>
+</div>
+
+    </main>
+
+    <!-- Firebase Compat SDKs from CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+    <!-- Custom Main JS -->
+    <script src="/static/js/main.js"></script>
+
+    <script>
+        // Set up Feather icons
+        feather.replace();
+
+        // Set up user's Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLDXiGL5ncQJM7T5cgyaYKs9cRTHkx0Xo",
+            authDomain: "olx-clone-marketplace-platform.firebaseapp.com",
+            projectId: "olx-clone-marketplace-platform",
+            storageBucket: "olx-clone-marketplace-platform.firebasestorage.app",
+            messagingSenderId: "226754294154",
+            appId: "1:226754294154:web:8aedaa282e32e4abbed873",
+            measurementId: "G-1Y8N15JT9C"
+        };
+
+        // Initialize Firebase SDK
+        initFirebase(firebaseConfig);
+
+        // Flash message toasts
+        
+            
+        
+    </script>
+    
+    <script>
+        async function toggleWishlist(event, productId, btnElement) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            try {
+                const response = await fetch('/api/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                
+                if (response.status === 401) {
+                    const data = await response.json();
+                    window.location.href = data.redirect;
+                    return;
+                }
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'added') {
+                        btnElement.classList.add('liked');
+                    } else if (data.status === 'removed') {
+                        btnElement.classList.remove('liked');
+                        // If we are on the wishlist page, optionally remove the card
+                        if (window.location.pathname === '/wishlist') {
+                            const card = btnElement.closest('.product-card');
+                            if (card) {
+                                card.style.transition = 'opacity 0.3s';
+                                card.style.opacity = '0';
+                                setTimeout(() => card.remove(), 300);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error toggling wishlist:", err);
+            }
+        }
+    </script>
+    
+<script>
+    // Scroll messages stream to the bottom automatically on load
+    const msgContainer = document.getElementById('messages-container');
+    if (msgContainer) {
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+</script>
+
+
+</body>
+</html>

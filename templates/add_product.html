@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Create Listing - AuraMarket{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="/" style="text-decoration:none; color:var(--text-secondary); font-size:14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+            <i data-feather="arrow-left" style="width:16px; height:16px;"></i> Back to Home
+        </a>
+    </div>
+
+    <h1 style="font-size:32px; margin-bottom:10px;">Create a New Ad Listing</h1>
+    <p style="color:var(--text-secondary); margin-bottom:30px;">Sell your item securely. Our automated AI engine analyzes listings in real-time to moderate content and screen price abnormalities.</p>
+
+    <div style="display:grid; grid-template-columns: 1.8fr 1fr; gap:30px;">
+        <!-- Left: The Form -->
+        <div class="glass-card">
+            <form action="/product/add" method="POST" enctype="multipart/form-data" class="auth-form" style="margin-top:0;">
+                <div class="form-group">
+                    <label for="listing-title">Listing Title</label>
+                    <input type="text" id="listing-title" name="title" required placeholder="e.g. iPhone 14 Pro Max 256GB - Flawless" minlength="5">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label for="listing-category">Category</label>
+                        <select id="listing-category" name="category_id" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="listing-price">Price (₹)</label>
+                        <input type="number" id="listing-price" name="price" required placeholder="e.g. 800" min="1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="listing-description">Description</label>
+                    <textarea id="listing-description" name="description" rows="6" required placeholder="Describe the item's condition, features, packaging, or flaws. 
+
+Note: Sharing phone numbers or emails directly in listing text is flagged for security reasons. Please direct buyers to the built-in messaging platform." minlength="10"></textarea>
+                </div>
+
+                <div class="form-group" id="image-inputs">
+                    <label>Image Sources (Main Image First)</label>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <input type="file" name="image_file" accept="image/*" style="flex:1;" required>
+                    </div>
+                </div>
+                <button type="button" onclick="addImageField()" class="btn btn-secondary" style="margin-bottom:15px; padding:6px 12px; font-size:12px; display:inline-block; border:1px dashed var(--border-color); background:transparent; color:var(--text-secondary);">+ Add Another Image</button>
+
+                <button type="submit" class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center; padding:12px;" onclick="logFirebaseEvent('add_to_cart', {item_name: document.getElementById('listing-title').value })">
+                    Publish Ad Listing
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: AI Moderation Side-Panel -->
+        <div>
+            <div class="glass-card" style="position:sticky; top:100px; border-color:var(--accent-color);">
+                <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <i data-feather="cpu" style="color:var(--accent-color);"></i> AI Listing Shield
+                </h3>
+                <p style="font-size:12px; color:var(--text-secondary); line-height:1.4; margin-bottom:16px;">
+                    Our content moderation algorithm parses inputs live to safeguard against fraud, unauthorized contact leakage, and price irregularities.
+                </p>
+
+                <!-- Dynamic container filled by main.js fetch API -->
+                <div id="moderation-results">
+                    <div style="font-size:13px; color:var(--text-secondary); text-align:center; padding:20px 0; border:1px dashed var(--border-color); border-radius:10px;">
+                        <i data-feather="loader" style="width:24px; height:24px; margin-bottom:8px; display:inline-block; animation:spin 2s linear infinite;"></i>
+                        <p>Awaiting form input to analyze...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+function addImageField() {
+    const container = document.getElementById('image-inputs');
+    const selectHtml = `
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <input type="file" name="image_file" accept="image/*" style="flex:1;">
+        <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:var(--danger); cursor:pointer;">&times;</button>
+    </div>
+    `;
+    container.insertAdjacentHTML('beforeend', selectHtml);
+}
+</script>
+{% endblock %}

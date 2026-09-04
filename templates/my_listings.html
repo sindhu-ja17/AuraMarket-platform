@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}My Listings - AuraMarket{% endblock %}
+
+{% block content %}
+<section class="products-section">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>My Listings</h2>
+        <a href="/product/add" class="btn btn-primary" style="padding:8px 16px;">
+            <i data-feather="plus" style="width:16px; height:16px;"></i> Add New
+        </a>
+    </div>
+    
+    {% if products %}
+        <div class="products-grid" style="margin-top: 20px;">
+            {% for prod in products %}
+                <div class="product-card" style="{% if prod.status == 'sold' %}opacity:0.6;{% elif prod.status == 'flagged' %}border-color:var(--danger);{% endif %}">
+                    <a href="/product/{{ prod.id }}" style="text-decoration:none; color:inherit; display:contents;">
+                        <img src="{{ prod.image_url or '/static/images/placeholder.jpg' }}" alt="{{ prod.title }}" class="product-image" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=350&q=80'">
+                        
+                        <div class="ai-badge" style="{% if prod.status == 'flagged' %}background-color:var(--danger-bg); color:var(--danger);{% endif %}">
+                            Status: {{ prod.status|upper }}
+                        </div>
+
+                        <div class="product-info">
+                            <span class="product-category">{{ prod.category_name }}</span>
+                            <h3 class="product-title">{{ prod.title }}</h3>
+                            <div class="product-meta">
+                                <span class="product-price">₹{{ "{:,.2f}".format(prod.price) }}</span>
+                                <span style="font-size:11px; color:var(--text-secondary);"><i data-feather="eye" style="width:12px; height:12px; vertical-align:middle;"></i> {{ prod.views }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    <div style="padding: 10px 15px; border-top: 1px solid var(--border-color); text-align: center; display:flex; gap:10px;">
+                        <a href="/product/{{ prod.id }}/edit" class="btn btn-secondary" style="flex:1; padding: 6px 10px; font-size: 13px; justify-content: center; z-index: 10; position: relative;">
+                            <i data-feather="edit-2" style="width:14px; height:14px;"></i> Edit
+                        </a>
+                        <form action="/product/{{ prod.id }}/delete" method="POST" style="flex:1; z-index: 10; position: relative;" onsubmit="return confirm('Are you sure you want to permanently delete this listing?');">
+                            <button type="submit" class="btn btn-secondary" style="width:100%; padding: 6px 10px; font-size: 13px; justify-content: center; color:var(--danger); border-color:var(--danger);">
+                                <i data-feather="trash-2" style="width:14px; height:14px;"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="glass-card" style="text-align:center; padding:50px 20px; margin-top:20px; color:var(--text-secondary);">
+            <i data-feather="tag" style="width:48px; height:48px; margin-bottom:16px; color:var(--accent-color);"></i>
+            <h3>You haven't posted any listings yet</h3>
+            <p style="margin-top:8px;">Start selling by posting your first product.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

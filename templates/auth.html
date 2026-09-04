@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'login' %}Login
+    {% elif mode == 'register' %}Register
+    {% elif mode == 'forgot_password' %}Forgot Password
+    {% elif mode == 'reset_password' %}Reset Password
+    {% elif mode == 'verify_otp' %}Verify OTP
+    {% endif %} - AuraMarket
+{% endblock %}
+
+{% block content %}
+<div class="auth-container glass-card">
+    <div style="text-align:center; margin-bottom:24px;">
+        <h2 style="font-size:24px;">
+            {% if mode == 'login' %}Welcome Back
+            {% elif mode == 'register' %}Create Account
+            {% elif mode == 'forgot_password' %}Reset Password
+            {% elif mode == 'reset_password' %}Create New Password
+            {% elif mode == 'verify_otp' %}Two-Factor Authentication
+            {% endif %}
+        </h2>
+        <p style="color:var(--text-secondary); font-size:14px; margin-top:6px;">
+            {% if mode == 'login' %}Log in to negotiate, bid, or list ads securely.
+            {% elif mode == 'register' %}Join the smartest online marketplace system.
+            {% elif mode == 'forgot_password' %}Enter your email to receive an OTP.
+            {% elif mode == 'reset_password' %}Enter your OTP and a new password.
+            {% elif mode == 'verify_otp' %}Enter the OTP sent to your email.
+            {% endif %}
+        </p>
+    </div>
+
+    <form action="/auth/{{ mode }}" method="POST" class="auth-form">
+        {% if mode == 'register' %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="e.g. buyer_alice" minlength="3">
+            </div>
+        {% endif %}
+        
+        {% if mode in ['login', 'register', 'forgot_password'] %}
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="name@email.com">
+            </div>
+        {% endif %}
+        
+        {% if mode in ['login', 'register', 'reset_password'] %}
+            <div class="form-group">
+                <label for="password">{% if mode == 'reset_password' %}New Password{% else %}Password{% endif %}</label>
+                <input type="password" id="password" name="password" required placeholder="••••••••" minlength="6">
+            </div>
+        {% endif %}
+        
+        {% if mode in ['reset_password', 'verify_otp'] %}
+            <div class="form-group">
+                <label for="otp">OTP Code</label>
+                <input type="text" id="otp" name="otp" required placeholder="123456" minlength="6" maxlength="6">
+            </div>
+        {% endif %}
+
+        {% if mode == 'login' %}
+            <div style="text-align:right; margin-bottom:15px; margin-top:-10px;">
+                <a href="/auth/forgot_password" style="font-size:13px; color:var(--accent-color); text-decoration:none;">Forgot Password?</a>
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary" style="justify-content:center; width:100%; padding:12px; margin-top:8px;">
+            {% if mode == 'login' %}Sign In
+            {% elif mode == 'register' %}Register Account
+            {% elif mode == 'forgot_password' %}Send OTP
+            {% elif mode == 'reset_password' %}Reset Password
+            {% elif mode == 'verify_otp' %}Verify OTP
+            {% endif %}
+        </button>
+    </form>
+
+    <div style="text-align:center; margin-top:20px; font-size:14px; border-top:1px solid var(--border-color); padding-top:20px;">
+        {% if mode == 'login' %}
+            <span style="color:var(--text-secondary);">New to AuraMarket? </span>
+            <a href="/auth/register" style="color:var(--accent-color); font-weight:600; text-decoration:none;">Create Account</a>
+        {% elif mode == 'register' %}
+            <span style="color:var(--text-secondary);">Already have an account? </span>
+            <a href="/auth/login" style="color:var(--accent-color); font-weight:600; text-decoration:none;">Sign In</a>
+        {% else %}
+            <a href="/auth/login" style="color:var(--accent-color); font-weight:600; text-decoration:none;">Back to Login</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

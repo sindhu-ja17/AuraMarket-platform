@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - AuraMarket{% endblock %}
+
+{% block content %}
+<h1 style="font-size:32px; margin-bottom:10px;">Marketplace Analytics Dashboard</h1>
+<p style="color:var(--text-secondary); margin-bottom:30px;">Real-time intelligence dashboard detailing listing impressions, transaction volumes, and AI-moderated listing checks.</p>
+
+<!-- Stats Grid -->
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div style="font-size:13px; color:var(--text-secondary); font-weight:600;">Active Listings</div>
+        <div class="stat-val">{{ stats.active_listings }}</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-size:13px; color:var(--text-secondary); font-weight:600;">Total Listing Impressions</div>
+        <div class="stat-val">{{ stats.total_views }}</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-size:13px; color:var(--text-secondary); font-weight:600;">Escrow Transactions</div>
+        <div class="stat-val">₹{{ "{:,.2f}".format(stats.escrow_volume) }}</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-size:13px; color:var(--text-secondary); font-weight:600;">AI Blocked Alerts</div>
+        <div class="stat-val" style="color:var(--danger);">{{ stats.flagged_listings_count }}</div>
+    </div>
+</div>
+
+<!-- Charts Section (using Chart.js) -->
+<div class="dashboard-charts">
+    <!-- Chart 1: Listing Views -->
+    <div class="glass-card">
+        <h3 style="font-size:16px; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+            <i data-feather="bar-chart-2" style="color:var(--accent-color);"></i> Listing Popularity (Impressions)
+        </h3>
+        <div class="chart-container">
+            <canvas id="viewsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart 2: Category Breakdown -->
+    <div class="glass-card">
+        <h3 style="font-size:16px; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+            <i data-feather="pie-chart" style="color:var(--accent-color);"></i> Catalog Shares by Category
+        </h3>
+        <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Moderation & Escrow Logs -->
+<div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px; margin-top:30px;">
+    <!-- AI Flagged Items Moderation -->
+    <div class="glass-card">
+        <h3 style="font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; color:var(--danger);">
+            <i data-feather="shield-off"></i> AI Shield Moderation Queue
+        </h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Listings automatically flagged and quarantined by the NLP Content Shield. Administrators can override or discard.</p>
+
+        {% if flagged_listings %}
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                {% for item in flagged_listings %}
+                    <div style="background-color:var(--bg-primary); border:1px solid var(--border-color); border-radius:10px; padding:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <h4 style="font-size:14px; font-weight:700;">{{ item.title }}</h4>
+                                <span style="font-size:11px; color:var(--text-secondary);">Seller: {{ item.seller_username }} | Price: ₹{{ item.price }}</span>
+                            </div>
+                            <span style="font-size:10px; background-color:var(--danger-bg); color:var(--danger); padding:4px 8px; border-radius:12px; font-weight:700;">Quarantined</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-secondary); margin-top:10px; border-left:2px solid var(--danger); padding-left:10px; font-style:italic;">
+                            Flag reasons: Content Moderation rules triggered.
+                        </p>
+                        
+                        <div style="display:flex; gap:10px; margin-top:14px;">
+                            <form action="/admin/listing/{{ item.id }}/approve" method="POST">
+                                <button type="submit" class="btn btn-secondary" style="font-size:11px; padding:6px 12px; color:var(--success);">Approve (Whiteshield)</button>
+                            </form>
+                            <form action="/admin/listing/{{ item.id }}/delete" method="POST">
+                                <button type="submit" class="btn btn-secondary" style="font-size:11px; padding:6px 12px; color:var(--danger);">Delete Listing</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center; padding:30px; color:var(--text-secondary); font-size:13px; border:1px dashed var(--border-color); border-radius:10px;">
+                🎉 Moderation queue is clean. AI Shield reported no malicious items.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Escrow Protection Transactions -->
+    <div class="glass-card">
+        <h3 style="font-size:18px; margin-bottom:16px; display:flex; align-items:center; gap:8px; color:var(--info);">
+            <i data-feather="lock"></i> Escrow Funds Ledger
+        </h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Transactions currently secured in escrow custody awaiting delivery confirmations.</p>
+
+        {% if transactions %}
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                {% for tx in transactions %}
+                    <div style="border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                        <div style="display:flex; justify-content:space-between; font-size:13px;">
+                            <strong>{{ tx.product_title }}</strong>
+                            <span style="font-family:'Outfit'; font-weight:700; color:var(--info);">₹{{ tx.amount }}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:11px; color:var(--text-secondary);">
+                            <span>Buyer: {{ tx.buyer_name }} ➡️ Seller: {{ tx.seller_name }}</span>
+                            <span style="background-color:rgba(59, 130, 246, 0.15); color:var(--info); padding:2px 6px; border-radius:10px; font-weight:600;">Escrowed</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="font-size:13px; color:var(--text-secondary); text-align:center; padding:30px;">No transaction logs found in secure ledger.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. Chart.js views config
+    const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+    const viewsData = {
+        labels: {{ chart_data.titles|tojson }},
+        datasets: [{
+            label: 'Total Views',
+            data: {{ chart_data.views|tojson }},
+            backgroundColor: 'rgba(139, 92, 246, 0.5)',
+            borderColor: 'rgb(139, 92, 246)',
+            borderWidth: 2,
+            borderRadius: 6,
+            hoverBackgroundColor: 'rgba(139, 92, 246, 0.8)'
+        }]
+    };
+    
+    new Chart(viewsCtx, {
+        type: 'bar',
+        data: viewsData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Chart.js category share config
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryData = {
+        labels: {{ chart_data.categories|tojson }},
+        datasets: [{
+            data: {{ chart_data.category_counts|tojson }},
+            backgroundColor: [
+                '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'
+            ],
+            borderWidth: 0
+        }]
+    };
+
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: categoryData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: 'var(--text-primary)', font: { family: 'Inter', size: 11 } }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

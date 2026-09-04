@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Listing - AuraMarket{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="/my_listings" style="text-decoration:none; color:var(--text-secondary); font-size:14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+            <i data-feather="arrow-left" style="width:16px; height:16px;"></i> Back to My Listings
+        </a>
+    </div>
+
+    <h1 style="font-size:32px; margin-bottom:10px;">Edit Ad Listing</h1>
+    <p style="color:var(--text-secondary); margin-bottom:30px;">Update your listing details. Changing the description or price will re-trigger the AI Moderation check.</p>
+
+    <div style="display:grid; grid-template-columns: 1.8fr 1fr; gap:30px;">
+        <!-- Left: The Form -->
+        <div class="glass-card">
+            <form action="/product/{{ product.id }}/edit" method="POST" enctype="multipart/form-data" class="auth-form" style="margin-top:0;">
+                <div class="form-group">
+                    <label for="listing-title">Listing Title</label>
+                    <input type="text" id="listing-title" name="title" required value="{{ product.title }}" minlength="5">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div class="form-group">
+                        <label for="listing-category">Category</label>
+                        <select id="listing-category" name="category_id" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id == product.category_id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="listing-price">Price (₹)</label>
+                        <input type="number" id="listing-price" name="price" required value="{{ product.price }}" min="1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="listing-description">Description</label>
+                    <textarea id="listing-description" name="description" rows="6" required minlength="10">{{ product.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Main Image</label>
+                    <div style="margin-bottom: 15px;">
+                        <img src="{{ product.image_url }}" alt="Current Image" style="max-width:200px; border-radius:8px; border:1px solid var(--border-color);">
+                    </div>
+                    
+                    <label>Upload New Main Image (Optional)</label>
+                    <input type="file" name="image_file" accept="image/*" style="width:100%; margin-bottom:10px;">
+                    <p style="font-size:12px; color:var(--text-secondary);">Leave blank to keep the current image.</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top:10px; width:100%; justify-content:center; padding:12px;">
+                    Update Listing
+                </button>
+            </form>
+        </div>
+
+        <!-- Right: AI Moderation Side-Panel -->
+        <div>
+            <div class="glass-card" style="position:sticky; top:100px; border-color:var(--accent-color);">
+                <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <i data-feather="cpu" style="color:var(--accent-color);"></i> AI Listing Shield
+                </h3>
+                <p style="font-size:12px; color:var(--text-secondary); line-height:1.4; margin-bottom:16px;">
+                    Our content moderation algorithm parses inputs live to safeguard against fraud, unauthorized contact leakage, and price irregularities.
+                </p>
+
+                <div id="moderation-results">
+                    <div style="font-size:13px; color:var(--text-secondary); text-align:center; padding:20px 0; border:1px dashed var(--border-color); border-radius:10px;">
+                        <i data-feather="loader" style="width:24px; height:24px; margin-bottom:8px; display:inline-block; animation:spin 2s linear infinite;"></i>
+                        <p>Awaiting form input to analyze...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

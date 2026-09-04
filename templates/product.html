@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.title }} - AuraMarket{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="/" style="text-decoration:none; color:var(--text-secondary); font-size:14px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+        <i data-feather="arrow-left" style="width:16px; height:16px;"></i> Back to Listings
+    </a>
+</div>
+
+<div class="detail-layout">
+    <!-- Left Column: Gallery & Details -->
+    <div>
+        <div class="product-gallery" style="position:relative;">
+            <!-- Simulated image using generic Unsplash fallback -->
+            <img id="main-product-image" src="{{ product.image_url }}" alt="{{ product.title }}" style="width:100%; border-radius:12px; object-fit:cover; aspect-ratio:4/3;" onerror="this.src='https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=800&q=80'">
+            <button class="like-btn {% if wishlist_ids is defined and product.id in wishlist_ids %}liked{% endif %}" onclick="toggleWishlist(event, {{ product.id }}, this)" aria-label="Like product">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+
+            
+            {% if additional_images %}
+            <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto;">
+                <img src="{{ product.image_url }}" onclick="document.getElementById('main-product-image').src=this.src" style="width:80px; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--border-color);" onerror="this.src='https://images.unsplash.com/photo-1546054454-aa26e2b734c7?auto=format&fit=crop&w=800&q=80'">
+                {% for img_url in additional_images %}
+                <img src="{{ img_url }}" onclick="document.getElementById('main-product-image').src=this.src" style="width:80px; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--border-color);" onerror="this.style.display='none'">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="glass-card" style="margin-top: 24px;">
+            <span class="product-category">{{ product.category_name }}</span>
+            <h1 style="font-size:32px; margin-top:6px; margin-bottom:12px; line-height:1.2;">{{ product.title }}</h1>
+            
+            <div class="meta-stats">
+                <span><i data-feather="eye" style="width:14px; height:14px; vertical-align:middle;"></i> {{ product.views }} views</span>
+                <span><i data-feather="clock" style="width:14px; height:14px; vertical-align:middle;"></i> Listed: {{ product.created_at[:10] }}</span>
+                <span><i data-feather="tag" style="width:14px; height:14px; vertical-align:middle;"></i> Item ID: #{{ product.id }}</span>
+            </div>
+            
+            <h3 style="margin-top:20px; margin-bottom:10px; font-size:18px;">Description</h3>
+            <p style="color:var(--text-secondary); white-space:pre-line; line-height:1.6;">{{ product.description }}</p>
+        </div>
+
+        <!-- Reviews & Feedback System -->
+        <div class="glass-card" style="margin-top: 24px;">
+            <h2 style="font-size:22px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+                <i data-feather="message-circle" style="color:var(--accent-color);"></i> User Reviews & Ratings
+            </h2>
+            
+            <!-- Review submission form -->
+            {% if session.get('user_id') %}
+                {% if session.get('user_id') != product.seller_id %}
+                    <form action="/product/{{ product.id }}/review" method="POST" class="auth-form" style="background-color:var(--bg-primary); padding:20px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:30px;">
+                        <h4 style="margin-bottom:10px;">Leave a Review for this Listing</h4>
+                        <div class="form-group">
+                            <label>Rating (1-5 Stars)</label>
+                            <select name="rating" required style="width: 120px;">
+                                <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                                <option value="4">⭐⭐⭐⭐ (4)</option>
+                                <option value="3">⭐⭐⭐ (3)</option>
+                                <option value="2">⭐⭐ (2)</option>
+                                <option value="1">⭐ (1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Review Comment</label>
+                            <textarea name="comment" rows="3" required placeholder="Describe your experience with the product or seller. Write something honest... Our AI will analyze the tone!"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Submit Review</button>
+                    </form>
+                {% else %}
+                    <div style="font-size:13px; color:var(--text-secondary); background:var(--bg-primary); padding:10px 14px; border-radius:8px; margin-bottom:20px;">
+                        💡 You cannot review your own listing.
+                    </div>
+                {% endif %}
+            {% else %}
+                <p style="font-size:14px; color:var(--text-secondary); margin-bottom:20px;">Please <a href="/auth/login" style="color:var(--accent-color); font-weight:600;">login</a> to leave a review.</p>
+            {% endif %}
+
+            <!-- Reviews list -->
+            {% if reviews %}
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    {% for rev in reviews %}
+                        <div style="border-bottom:1px solid var(--border-color); padding-bottom:16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                                <div>
+                                    <strong style="font-size:14px;">{{ rev.reviewer_name }}</strong>
+                                    <div style="color:var(--warning); font-size:12px; margin-top:2px;">
+                                        {{ '⭐' * rev.rating }}
+                                    </div>
+                                </div>
+                                <span style="font-size:11px; padding:4px 8px; border-radius:12px; font-weight:600; display:flex; align-items:center; gap:4px;
+                                    {% if rev.sentiment_score >= 0.5 %}
+                                        background-color:rgba(52, 211, 153, 0.15); color:#047857;
+                                    {% elif rev.sentiment_score <= -0.15 %}
+                                        background-color:rgba(239, 68, 68, 0.15); color:#b91c1c;
+                                    {% else %}
+                                        background-color:rgba(245, 158, 11, 0.15); color:#b45309;
+                                    {% endif %}
+                                ">
+                                    Sentiment: {{ rev.sentiment_label }}
+                                </span>
+                            </div>
+                            <p style="font-size:14px; color:var(--text-secondary); margin-top:6px;">{{ rev.comment }}</p>
+                            <span style="font-size:11px; color:var(--text-secondary); display:block; margin-top:4px;">{{ rev.created_at[:16] }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:var(--text-secondary); font-size:14px; text-align:center; padding:20px 0;">No reviews listed yet. Be the first to share your feedback!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Buyer purchase box, AI Sentiment Analyzer, Seller Details, Safe Escrow -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Purchase Panel -->
+        <div class="glass-card">
+            <span style="font-size:13px; color:var(--text-secondary); font-weight:600;">Listed Price</span>
+            <div class="product-price" style="font-size:36px; margin:4px 0 16px;">₹{{ "{:,.2f}".format(product.price) }}</div>
+            
+            {% if product.status == 'active' %}
+                {% if session.get('user_id') %}
+                    {% if session.get('user_id') != product.seller_id %}
+                        <!-- Buying triggers transaction simulated escrow checkout page -->
+                        <a href="/product/{{ product.id }}/checkout" class="btn btn-primary" style="width:100%; justify-content:center; padding:14px; margin-bottom:12px;" onclick="logFirebaseEvent('initiate_checkout', {item_id: '{{ product.id }}', value: {{ product.price }} })">
+                            <i data-feather="shopping-bag"></i> Buy Now (Secure Escrow)
+                        </a>
+                        <a href="/chat/start/{{ product.id }}" class="btn btn-secondary" style="width:100%; justify-content:center; padding:12px;">
+                            <i data-feather="message-circle"></i> Chat with Seller
+                        </a>
+                    {% else %}
+                        <div class="btn btn-secondary" style="width:100%; justify-content:center; cursor:default; background-color:var(--bg-primary); border-style:dashed; margin-bottom:12px;">
+                            📢 This is your listing
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <a href="/product/{{ product.id }}/edit" class="btn btn-primary" style="flex:1; justify-content:center; padding:12px;">
+                                <i data-feather="edit-2"></i> Edit
+                            </a>
+                            <form action="/product/{{ product.id }}/delete" method="POST" style="flex:1;" onsubmit="return confirm('Are you sure you want to permanently delete this listing?');">
+                                <button type="submit" class="btn btn-secondary" style="width:100%; justify-content:center; padding:12px; color:var(--danger); border-color:var(--danger);">
+                                    <i data-feather="trash-2"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="/auth/login" class="btn btn-primary" style="width:100%; justify-content:center; padding:14px; margin-bottom:12px;">
+                        Log In to Buy or Chat
+                    </a>
+                {% endif %}
+            {% else %}
+                <div style="background-color:var(--danger-bg); color:var(--danger); text-align:center; padding:12px; border-radius:10px; font-weight:700;">
+                    ⛔ Item Status: {{ product.status|upper }}
+                </div>
+            {% endif %}
+
+            <!-- Secure Escrow protection info -->
+            <div class="transaction-box">
+                <h4 style="font-size:13px; font-weight:700; color:var(--info); display:flex; align-items:center; gap:6px;">
+                    <i data-feather="shield" style="width:14px; height:14px;"></i> Aura Escrow Protection
+                </h4>
+                <p style="font-size:11px; color:var(--text-secondary); margin-top:6px; line-height:1.4;">
+                    Your funds are held securely in a simulated escrow account. The seller will only be paid once you receive and confirm the item's condition.
+                </p>
+            </div>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="glass-card ai-sentiment-panel">
+            <h3 style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+                <i data-feather="cpu" style="color:var(--accent-color);"></i> AI Description Analysis
+            </h3>
+            <p style="font-size:12px; color:var(--text-secondary); margin-top:6px;">NLP sentiment assessment of the seller's product description copy.</p>
+            
+            <div class="sentiment-gauge">
+                <div class="gauge-track">
+                    <!-- Shift sentiment score from [-1, 1] range to [0, 100] percentage for CSS layout -->
+                    <div class="gauge-fill" style="width: {{ ((product.sentiment_score + 1.0) / 2.0) * 100 }}%;"></div>
+                </div>
+                <strong style="font-size:14px; width:45px; text-align:right;">
+                    {{ product.sentiment_score }}
+                </strong>
+            </div>
+            
+            <div style="margin-top:14px; display:flex; align-items:center; gap:8px;">
+                <span class="sentiment-dot {% if product.sentiment_score >= 0.5 %}sentiment-pos{% elif product.sentiment_score <= -0.15 %}sentiment-neg{% else %}sentiment-neu{% endif %}"></span>
+                <span style="font-size:13px; font-weight:600;">Overall Tone: {{ product.sentiment_label }}</span>
+            </div>
+
+            <p style="font-size:12px; color:var(--text-secondary); margin-top:10px; line-height:1.4; border-top:1px solid var(--border-color); padding-top:10px;">
+                {% if product.sentiment_score >= 0.5 %}
+                    🌟 **Highly Positive Tone**: This description utilizes welcoming, trustworthy terms indicating a high confidence level from the seller.
+                {% elif product.sentiment_score >= 0.15 %}
+                    ✅ **Positive Tone**: The text features constructive language focusing on features and quality metrics.
+                {% elif product.sentiment_score <= -0.15 %}
+                    ⚠️ **Negative / Critical Tone**: This description highlights flaws, wear, or criticisms. Review warnings carefully.
+                {% else %}
+                    ⚖️ **Neutral / Factual Tone**: The writeup is concise and objectively technical, describing raw features without emotional modifiers.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Seller Profile Card -->
+        <div class="glass-card">
+            <h3 style="font-size:16px; margin-bottom:12px;">Seller Details</h3>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="chat-avatar" style="width:48px; height:48px; font-size:18px;">
+                    {{ seller.username[0]|upper }}
+                </div>
+                <div>
+                    <h4 style="font-size:15px; font-weight:700;">{{ seller.username }}</h4>
+                    <span style="font-size:12px; color:var(--text-secondary);">Member since: {{ seller.created_at[:4] }}</span>
+                </div>
+            </div>
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px; padding-top:12px; border-top:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:13px; color:var(--text-secondary);">Seller Rating:</span>
+                    <strong style="color:var(--warning); font-size:14px;">⭐ {{ seller.rating }} / 5.0</strong>
+                </div>
+                {% if seller.phone_number %}
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:13px; color:var(--text-secondary);">Phone:</span>
+                    <strong style="font-size:13px; color:var(--text-primary);">{{ seller.phone_number }}</strong>
+                </div>
+                {% endif %}
+                {% if seller.address %}
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; text-align:right;">
+                    <span style="font-size:13px; color:var(--text-secondary); white-space:nowrap; margin-right: 10px;">Address:</span>
+                    <strong style="font-size:13px; color:var(--text-primary); line-height: 1.4;">{{ seller.address }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Similar Items Carousel / Grid -->
+{% if similar_products %}
+<section class="products-section" style="margin-top: 50px; border-top: 1px solid var(--border-color); padding-top: 40px;">
+    <h2>Similar Listings You Might Like</h2>
+    <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">AI Content similarity matches using vector keywords relevance.</p>
+    
+    <div class="products-grid">
+        {% for prod in similar_products %}
+            <div class="product-card" onclick="logFirebaseEvent('similar_item_click', {item_id: '{{ prod.id }}'})">
+                <a href="/product/{{ prod.id }}" style="text-decoration:none; color:inherit; display:contents;">
+                    <img src="{{ prod.image_url }}" alt="{{ prod.title }}" class="product-image" onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=350&q=80'">
+                    
+                    <div class="ai-badge">
+                        <span class="sentiment-dot {% if prod.sentiment_score >= 0.5 %}sentiment-pos{% elif prod.sentiment_score <= -0.15 %}sentiment-neg{% else %}sentiment-neu{% endif %}"></span>
+                        AI: {{ prod.sentiment_label }}
+                    </div>
+
+                    <div class="product-info">
+                        <span class="product-category">{{ prod.category_name }}</span>
+                        <h3 class="product-title">{{ prod.title }}</h3>
+                        <div class="product-meta">
+                            <span class="product-price">₹{{ "{:,.2f}".format(prod.price) }}</span>
+                            <span style="font-size:11px; color:var(--text-secondary);"><i data-feather="eye" style="width:12px; height:12px; vertical-align:middle;"></i> {{ prod.views }} views</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
