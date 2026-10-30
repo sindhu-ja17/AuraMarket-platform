@@ -183,7 +183,7 @@
         text.style.display = 'none';
         spinner.style.display = 'inline-block';
         
-        logFirebaseEvent('add_payment_info', { item_id: '{{ product.id }}', price: {{ product.price }} });
+        logFirebaseEvent('add_payment_info', { item_id: '{{ product.id }}', price: parseFloat('{{ product.price }}') });
         
         // Wait 1.5 seconds then submit programmatically
         setTimeout(() => {
