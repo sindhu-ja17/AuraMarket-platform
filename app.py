@@ -53,6 +53,9 @@ def inject_categories():
 # HOMEPAGE & SEARCH
 # ==========================================
 @app.route('/')
+@app.route('/api/index')
+@app.route('/api/index/')
+@app.route('/api')
 def index():
     query = request.args.get('q', '').strip()
     category_id = request.args.get('category', '').strip()
