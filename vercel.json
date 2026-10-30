@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{templates/**,marketplace.db,static/**}"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
