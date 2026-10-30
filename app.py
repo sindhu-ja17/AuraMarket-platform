@@ -8,8 +8,14 @@ from werkzeug.utils import secure_filename
 import database as db
 from ai_engine import SentimentAnalyzer, ContentModerator, ProductRecommender, get_collaborative_recommendations, get_view_based_recommendations, SmartChatbot
 
-app = Flask(__name__)
-app.secret_key = 'auramarket_super_secret_key_change_me'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
+app.secret_key = os.environ.get('SECRET_KEY', 'auramarket_super_secret_key_change_me')
 
 # Ensure the database is initialized
 db.init_db()
@@ -390,9 +396,13 @@ def add_product():
                 filename = secure_filename(file.filename)
                 unique_filename = f"{int(time.time())}_{filename}"
                 filepath = os.path.join(app.root_path, 'static', 'uploads', unique_filename)
-                os.makedirs(os.path.dirname(filepath), exist_ok=True)
-                file.save(filepath)
-                image_urls.append(f'/static/uploads/{unique_filename}')
+                try:
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                    file.save(filepath)
+                    image_urls.append(f'/static/uploads/{unique_filename}')
+                except OSError:
+                    # In read-only serverless environment (e.g. Vercel)
+                    image_urls.append('/static/images/placeholder.jpg')
                 
         main_image_url = image_urls[0] if image_urls else '/static/images/placeholder.jpg'
         seller_id = session['user_id']
@@ -472,9 +482,12 @@ def edit_product(product_id):
                 filename = secure_filename(file.filename)
                 unique_filename = f"{int(time.time())}_{filename}"
                 filepath = os.path.join(app.root_path, 'static', 'uploads', unique_filename)
-                os.makedirs(os.path.dirname(filepath), exist_ok=True)
-                file.save(filepath)
-                new_image_url = f'/static/uploads/{unique_filename}'
+                try:
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                    file.save(filepath)
+                    new_image_url = f'/static/uploads/{unique_filename}'
+                except OSError:
+                    pass
                 break # Only update main image in this view
                 
         cursor.execute('''

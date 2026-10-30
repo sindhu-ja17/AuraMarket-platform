@@ -1,12 +1,28 @@
 import sqlite3
 import os
+import shutil
 import hashlib
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'marketplace.db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BUNDLED_DB = os.path.join(BASE_DIR, 'marketplace.db')
+
+def get_db_path():
+    if os.environ.get('VERCEL'):
+        tmp_db = '/tmp/marketplace.db'
+        if not os.path.exists(tmp_db) and os.path.exists(BUNDLED_DB):
+            try:
+                shutil.copy2(BUNDLED_DB, tmp_db)
+            except Exception as e:
+                print(f"Notice: copying DB to /tmp failed ({e}), using /tmp fresh.")
+        return tmp_db
+    return BUNDLED_DB
+
+DB_PATH = get_db_path()
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_db_path()
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
