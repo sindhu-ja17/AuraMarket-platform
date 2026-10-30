@@ -14,10 +14,10 @@ new_products = [
     ('Skateboard (Maple Wood)', 'Complete skateboard with 7-ply Canadian maple deck. Smooth ABEC-9 bearings and durable wheels.', 3000.0, 5, 'https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.85, 'Highly Positive'),
 
     # Fashion & Beauty (category_id = 4)
-    ('Gold Plated Necklace', 'Elegant 18k gold plated pendant necklace. Perfect for evening wear and special occasions. Non-tarnish material.', 2500.0, 4, 'https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.88, 'Highly Positive'),
+    ('Gold Plated Necklace', 'Elegant 18k gold plated pendant necklace. Perfect for evening wear and special occasions. Non-tarnish material.', 2500.0, 4, '/static/images/gold_necklace.png', 2, 'active', 0.88, 'Highly Positive'),
     ('Designer Aviator Sunglasses', 'Classic aviator sunglasses with polarized UV400 lenses. Sturdy metal frame, includes protective case.', 1800.0, 4, 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.7, 'Positive'),
     ('Matte Red Lipstick', 'Long-lasting matte liquid lipstick. Deep red shade suitable for all skin tones. Cruelty-free and smudge-proof.', 800.0, 4, 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.65, 'Positive'),
-    ("Men's Formal Oxford Shoes", 'Genuine leather formal Oxford shoes in black. Comfortable insole for all-day wear. Classic and sophisticated.', 3500.0, 4, 'https://images.unsplash.com/photo-1614252209844-784860b2184e?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.75, 'Positive'),
+    ("Men's Formal Oxford Shoes", 'Genuine leather formal Oxford shoes in black. Comfortable insole for all-day wear. Classic and sophisticated.', 3500.0, 4, '/static/images/oxford_shoes.png', 2, 'active', 0.75, 'Positive'),
     ('Floral Print Maxi Dress', 'Beautiful flowy maxi dress with summer floral prints. Breathable fabric, perfect for casual outings or beach vacations.', 2200.0, 4, 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80', 2, 'active', 0.8, 'Positive'),
 ]
 

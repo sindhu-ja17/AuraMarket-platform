@@ -299,79 +299,41 @@ class ProductRecommender:
         return scores[:top_n]
 
 # ==========================================
-# 4. COLLABORATIVE FILTERING RECOMMENDER
+# 4. VIEW-BASED & COLLABORATIVE RECOMMENDER
 # ==========================================
-def get_collaborative_recommendations(user_id, conn, top_n=4):
+def get_view_based_recommendations(user_id=None, session_views=None, conn=None, recommender=None, all_products=None, top_n=4):
     """
-    Generate item recommendations for user_id based on User-User Jaccard similarity.
-    Fails back to popular items if the user is new (cold start) or has few interactions.
+    Generate item recommendations for "AI Recommended for You" prioritized strictly by view counts.
+    As views increase for any product, the recommendations dynamically update and re-rank.
     """
+    if not conn:
+        return [], None
+
     cursor = conn.cursor()
+    cursor.execute('''
+        SELECT id, views 
+        FROM products 
+        WHERE status = 'active' 
+        ORDER BY views DESC, id DESC 
+        LIMIT ?
+    ''', (top_n,))
+    rows = cursor.fetchall()
+    rec_ids = [row['id'] for row in rows]
     
-    # 1. Fetch user interaction profiles: {uid: set([pids])}
-    cursor.execute("SELECT user_id, product_id FROM interactions WHERE type IN ('view', 'like', 'buy')")
-    user_interactions = {}
-    for row in cursor.fetchall():
-        uid = row['user_id']
-        pid = row['product_id']
-        if uid not in user_interactions:
-            user_interactions[uid] = set()
-        user_interactions[uid].add(pid)
-        
-    # Get active products to make sure we only recommend active ones
-    cursor.execute("SELECT id FROM products WHERE status = 'active'")
-    active_product_ids = set(row['id'] for row in cursor.fetchall())
-        
-    # Cold Start check
-    if user_id not in user_interactions or len(user_interactions[user_id]) == 0:
-        # Fallback to trending/popular items (most views)
-        cursor.execute("SELECT id FROM products WHERE status = 'active' ORDER BY views DESC LIMIT ?", (top_n,))
-        return [row['id'] for row in cursor.fetchall()]
-        
-    target_profile = user_interactions[user_id]
-    user_similarities = []
-    
-    # 2. Compute Jaccard Similarity with other users
-    for other_uid, other_profile in user_interactions.items():
-        if other_uid == user_id:
-            continue
+    most_viewed_prod = None
+    if rec_ids:
+        cursor.execute('SELECT * FROM products WHERE id = ?', (rec_ids[0],))
+        row = cursor.fetchone()
+        if row:
+            most_viewed_prod = dict(row)
             
-        intersection = len(target_profile.intersection(other_profile))
-        union = len(target_profile.union(other_profile))
-        
-        if union > 0:
-            similarity = intersection / union
-            if similarity > 0:
-                user_similarities.append((other_uid, similarity))
-                
-    # Sort similar users by score descending
-    user_similarities.sort(key=lambda x: x[1], reverse=True)
-    
-    # 3. Recommend products interacting with by similar users, not seen by target user
-    recommendations = {}
-    for similar_uid, similarity in user_similarities:
-        for pid in user_interactions[similar_uid]:
-            # Must be active and not already interacted with by target user
-            if pid in active_product_ids and pid not in target_profile:
-                if pid not in recommendations:
-                    recommendations[pid] = 0.0
-                recommendations[pid] += similarity
-                
-    # Sort recommended items by cumulative weight
-    sorted_recs = sorted(recommendations.items(), key=lambda x: x[1], reverse=True)
-    rec_ids = [pid for pid, score in sorted_recs][:top_n]
-    
-    # If not enough recommendations, fill up with popular items
-    if len(rec_ids) < top_n:
-        fill_count = top_n - len(rec_ids)
-        cursor.execute(
-            "SELECT id FROM products WHERE status = 'active' AND id NOT IN ({}) ORDER BY views DESC LIMIT ?".format(
-                ','.join(str(i) for i in (list(target_profile) + rec_ids)) if (list(target_profile) + rec_ids) else '0'
-            ), (fill_count,)
-        )
-        rec_ids.extend([row['id'] for row in cursor.fetchall()])
-        
-    return rec_ids[:top_n]
+    return rec_ids, most_viewed_prod
+
+
+def get_collaborative_recommendations(user_id, conn, top_n=4):
+    """Legacy wrapper for view-based recommendations."""
+    rec_ids, _ = get_view_based_recommendations(user_id=user_id, conn=conn, top_n=top_n)
+    return rec_ids
 
 import os
 try:

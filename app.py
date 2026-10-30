@@ -6,7 +6,7 @@ import time
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.utils import secure_filename
 import database as db
-from ai_engine import SentimentAnalyzer, ContentModerator, ProductRecommender, get_collaborative_recommendations, SmartChatbot
+from ai_engine import SentimentAnalyzer, ContentModerator, ProductRecommender, get_collaborative_recommendations, get_view_based_recommendations, SmartChatbot
 
 app = Flask(__name__)
 app.secret_key = 'auramarket_super_secret_key_change_me'
@@ -97,23 +97,17 @@ def index():
             ''', (f'%{query}%', f'%{query}%'))
             products = [dict(row) for row in cursor.fetchall()]
 
-    # 3. Dynamic User Collaborative Recommendations
-    recommendations = []
-    user_id = session.get('user_id')
-    if user_id:
-        rec_ids = get_collaborative_recommendations(user_id, conn, top_n=4)
-        if rec_ids:
-            # Fetch those recommended products
-            placeholders = ','.join('?' for _ in rec_ids)
-            cursor.execute(f'''
-                SELECT p.*, c.name as category_name
-                FROM products p
-                JOIN categories c ON p.category_id = c.id
-                WHERE p.id IN ({placeholders}) AND p.status = 'active'
-            ''', rec_ids)
-            recs_dict = {row['id']: dict(row) for row in cursor.fetchall()}
-            # Maintain order returned by collaborative recommendation algorithm
-            recommendations = [recs_dict[rid] for rid in rec_ids if rid in recs_dict]
+    # 3. Dynamic AI Recommended for You (Strictly prioritized by highest view counts)
+    cursor.execute('''
+        SELECT p.*, c.name as category_name
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        WHERE p.status = 'active'
+        ORDER BY p.views DESC, p.id DESC
+        LIMIT 4
+    ''')
+    recommendations = [dict(row) for row in cursor.fetchall()]
+    most_viewed_product = recommendations[0] if recommendations else None
 
     # Fetch selected category name for UI header
     selected_category_name = None
@@ -131,7 +125,7 @@ def index():
         wishlist_ids = [row['product_id'] for row in cursor.fetchall()]
 
     conn.close()
-    return render_template('index.html', products=products, recommendations=recommendations, query=query, selected_category=category_id, selected_category_name=selected_category_name, wishlist_ids=wishlist_ids)
+    return render_template('index.html', products=products, recommendations=recommendations, query=query, selected_category=category_id, selected_category_name=selected_category_name, wishlist_ids=wishlist_ids, most_viewed_product=most_viewed_product)
 
 # ==========================================
 # AUTHENTICATION ROUTES
@@ -312,6 +306,13 @@ def product_details(product_id):
     cursor.execute("UPDATE products SET views = views + 1 WHERE id = ?", (product_id,))
     conn.commit()
     
+    # Track views in session (immediate feedback for current browsing session)
+    if 'view_counts' not in session:
+        session['view_counts'] = {}
+    session['view_counts'][str(product_id)] = session['view_counts'].get(str(product_id), 0) + 1
+    session['last_viewed_id'] = product_id
+    session.modified = True
+
     # Log 'view' interaction if logged in
     user_id = session.get('user_id')
     if user_id:

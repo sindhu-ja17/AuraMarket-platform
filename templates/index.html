@@ -47,7 +47,13 @@
         </div>
         <h2 style="font-size:22px;">AI Recommended for You</h2>
     </div>
-    <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">Based on your activity patterns and collaborative item scoring.</p>
+    <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">
+        {% if most_viewed_product %}
+            Most viewed trending product: <strong style="color:var(--accent-color);">{{ most_viewed_product.title }}</strong> ({{ most_viewed_product.views }} views). Recommendations dynamically update as views increase.
+        {% else %}
+            Curated based on highest views and user popularity.
+        {% endif %}
+    </p>
     
     <div class="products-grid">
         {% for prod in recommendations %}
